@@ -38,6 +38,7 @@ class AlarmScheduleRequestBuilderTest {
         assertEquals("t1", request.taskId)
         assertEquals(expected, request.triggerAtMillis)
         assertTrue(request.exact)
+        assertTrue(request.alarmClock)
     }
 
     @Test
@@ -60,6 +61,7 @@ class AlarmScheduleRequestBuilderTest {
         val expected = LocalDateTime.of(2026, 6, 18, 9, 5).atZone(zone).toInstant().toEpochMilli()
         assertEquals(expected, request.triggerAtMillis)
         assertEquals(2, request.repeatIndex)
+        assertEquals(false, request.alarmClock)
     }
 
     @Test

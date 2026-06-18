@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.sqhh99.punchreminder.MainActivity
 import com.sqhh99.punchreminder.domain.scheduler.AlarmScheduleRequest
 import com.sqhh99.punchreminder.domain.usecase.AlarmGateway
 import com.sqhh99.punchreminder.system.receiver.AlarmReceiver
@@ -12,8 +13,8 @@ import com.sqhh99.punchreminder.system.receiver.AlarmReceiver
 /**
  * 封装 AlarmManager（实现方案 §5）。到点通过 [AlarmReceiver] 广播触发。
  *
- * 系统允许精确闹钟时用 setExactAndAllowWhileIdle，否则降级为 setAndAllowWhileIdle，
- * 不承诺所有机型都能精确/后台唤醒（§20）。
+ * 首次提醒使用 setAlarmClock，以系统闹钟级别触发；重复提醒继续使用
+ * setExactAndAllowWhileIdle / setAndAllowWhileIdle，避免占用系统下一次闹钟入口。
  */
 class AlarmScheduler(private val context: Context) : AlarmGateway {
 
@@ -29,6 +30,13 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
 
     override fun schedule(request: AlarmScheduleRequest) {
         val pendingIntent = createPendingIntent(request.taskId, request.repeatIndex)
+        if (request.alarmClock) {
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(request.triggerAtMillis, showIntent(request.taskId)),
+                pendingIntent,
+            )
+            return
+        }
         val useExact = request.exact && canScheduleExact()
         if (useExact) {
             alarmManager.setExactAndAllowWhileIdle(
@@ -61,6 +69,14 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
+    private fun showIntent(taskId: String): PendingIntent =
+        PendingIntent.getActivity(
+            context,
+            taskId.hashCode() + SHOW_INTENT_OFFSET,
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
     private fun existingPendingIntent(taskId: String): PendingIntent? =
         PendingIntent.getBroadcast(
             context,
@@ -75,4 +91,8 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
             putExtra(AlarmReceiver.EXTRA_TASK_ID, taskId)
             putExtra(AlarmReceiver.EXTRA_REPEAT_INDEX, repeatIndex)
         }
+
+    private companion object {
+        const val SHOW_INTENT_OFFSET = 10_000
+    }
 }
