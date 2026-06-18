@@ -2,6 +2,7 @@
 
 [![PR Check](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/pr-check.yml/badge.svg)](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/pr-check.yml)
 [![Main Build](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/main-build.yml/badge.svg)](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/main-build.yml)
+[![Release](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/release.yml/badge.svg)](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/release.yml)
 
 上下班打卡提醒助手 / 定时应用启动助手。在用户授权和主动配置的前提下，于指定时间提醒用户，
 并尽可能自动拉起指定打卡应用，降低忘记打卡的概率。
@@ -55,7 +56,21 @@ app/src/main/java/com/sqhh99/punchreminder/
 - **PR Check**（`.github/workflows/pr-check.yml`）：wrapper 校验 + Lint + 单元测试 + debug 构建，快速反馈。
 - **Main Build**（`.github/workflows/main-build.yml`）：合并到 main 后产出可追溯命名的 debug APK
   （`PunchReminder-debug-<version>-main-<shortsha>.apk`）及测试/lint 报告 artifact。
-- nightly 与 release 流水线将在后续里程碑加入。
+- **Release**（`.github/workflows/release.yml`）：推送 `v*` tag 后自动构建并发布到 GitHub Releases。
+- nightly 流水线将在后续里程碑加入。
+
+## 发布（Release）
+
+本地打 tag 即触发自动发布，APK 作为附件出现在 [Releases](https://github.com/Sqhh99/punch-reminder-android/releases) 页：
+
+```bash
+# 确认 app/build.gradle.kts 的 versionName 与 tag 一致（去掉前缀 v），例如 0.5.0
+git tag v0.5.0 -m "0.5.0 开机恢复 + Release 流水线"
+git push origin v0.5.0
+```
+
+工作流构建 `PunchReminder-v<tag>-debug.apk` 并创建对应 Release。当前为 **debug 签名**包，可直接安装；
+正式 keystore 签名（通过 GitHub Secrets 注入，不提交密钥）留待后续里程碑。
 
 ## 能力边界（实现方案 §20）
 
@@ -68,11 +83,11 @@ app/src/main/java/com/sqhh99/punchreminder/
 
 ## 路线图（实现方案 §23）
 
-- [x] 0.1.0 工程骨架 + GitHub Actions 自动构建（本里程碑）
-- [ ] 0.2.0 任务管理 + 本地保存
-- [ ] 0.3.0 应用选择 + 手动打开目标 App
-- [ ] 0.4.0 AlarmManager 定时触发 + 通知提醒
-- [ ] 0.5.0 开机恢复 + 工作日规则
+- [x] 0.1.0 工程骨架 + GitHub Actions 自动构建
+- [x] 0.2.0 任务管理 + 本地保存
+- [x] 0.3.0 应用选择 + 手动打开目标 App
+- [x] 0.4.0 AlarmManager 定时触发 + 通知提醒
+- [x] 0.5.0 开机恢复 + tag 触发 Release 发布（本里程碑）
 - [ ] 0.6.0 锁屏提醒 + Full-screen Intent
 - [ ] 0.7.0 重复提醒 + 权限诊断
 - [ ] 1.0.0 稳定自用版本

@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- 读取「可从桌面启动的应用」列表，避免使用 QUERY_ALL_PACKAGES。 -->
     <queries>
@@ -36,6 +37,19 @@
         <receiver
             android:name=".system.receiver.AlarmReceiver"
             android:exported="false" />
+
+        <!-- 开机 / 覆盖安装 / 时间变更后重排闹钟。均为系统受保护广播，exported=false 即可接收。 -->
+        <receiver
+            android:name=".system.receiver.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
