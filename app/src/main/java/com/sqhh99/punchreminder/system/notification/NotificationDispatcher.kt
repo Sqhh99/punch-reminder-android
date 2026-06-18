@@ -1,5 +1,6 @@
 package com.sqhh99.punchreminder.system.notification
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -12,6 +13,7 @@ import com.sqhh99.punchreminder.R
 import com.sqhh99.punchreminder.domain.model.PunchTask
 import com.sqhh99.punchreminder.domain.notification.NotificationContentBuilder
 import com.sqhh99.punchreminder.domain.usecase.NotificationGateway
+import com.sqhh99.punchreminder.system.permission.NotificationPermission
 
 /**
  * 发送提醒通知（实现方案 §5）。本里程碑实现普通 + 高优先级通知；
@@ -34,7 +36,10 @@ class NotificationDispatcher(
     }
 
     /** 发送任务提醒。[openTargetApp] 为 true 时点击通知直接打开目标应用，否则打开本应用。 */
+    @SuppressLint("MissingPermission") // 已在上方显式校验 POST_NOTIFICATIONS
     override fun notify(task: PunchTask, openTargetApp: Boolean) {
+        // 未授予通知权限时（Android 13+）直接跳过，避免无效调用。
+        if (!NotificationPermission.isGranted(context)) return
         ensureChannel()
         val content = contentBuilder.build(task)
 
