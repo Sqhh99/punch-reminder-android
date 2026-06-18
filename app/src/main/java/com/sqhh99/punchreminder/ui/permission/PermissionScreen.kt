@@ -84,7 +84,7 @@ fun PermissionScreen(
                     text = if (state.allGranted) {
                         "全部就绪：提醒可尽量准时、锁屏弹出。"
                     } else {
-                        "部分权限未开启，可能影响准时提醒或锁屏弹出，建议逐项开启。"
+                        "部分权限未开启，可能影响后台准时提醒或锁屏弹出，建议逐项开启。"
                     },
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -145,4 +145,5 @@ private fun permissionInfo(type: PermissionType): PermissionInfo = when (type) {
     PermissionType.NOTIFICATION -> PermissionInfo("通知权限", "到点发送打卡提醒通知。")
     PermissionType.EXACT_ALARM -> PermissionInfo("精确闹钟", "尽量在设定时间准点提醒，而非被系统延后。")
     PermissionType.FULL_SCREEN -> PermissionInfo("全屏提醒", "锁屏/息屏时弹出全屏提醒页，更不易错过。")
+    PermissionType.BATTERY_OPTIMIZATION -> PermissionInfo("后台电池限制", "允许后台运行，降低退出应用后提醒被系统拦截的概率。")
 }

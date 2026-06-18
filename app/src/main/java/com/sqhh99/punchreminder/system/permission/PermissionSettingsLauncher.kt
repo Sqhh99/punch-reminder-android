@@ -18,6 +18,7 @@ class PermissionSettingsLauncher(private val context: Context) {
             PermissionType.NOTIFICATION -> notificationSettings()
             PermissionType.EXACT_ALARM -> exactAlarmSettings()
             PermissionType.FULL_SCREEN -> fullScreenSettings()
+            PermissionType.BATTERY_OPTIMIZATION -> batteryOptimizationSettings()
         }
         launch(intent)
     }
@@ -39,6 +40,9 @@ class PermissionSettingsLauncher(private val context: Context) {
         } else {
             null
         }
+
+    private fun batteryOptimizationSettings(): Intent =
+        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
 
     private fun appUri(): Uri = Uri.fromParts("package", context.packageName, null)
 

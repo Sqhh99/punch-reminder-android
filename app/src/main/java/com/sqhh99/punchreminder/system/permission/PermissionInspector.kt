@@ -17,5 +17,6 @@ class PermissionInspector(
         notificationGranted = NotificationPermission.isGranted(context),
         exactAlarmGranted = alarmGateway.canScheduleExact(),
         fullScreenGranted = FullScreenIntentPermission.canUse(context),
+        batteryOptimizationIgnored = BatteryOptimizationPermission.isIgnored(context),
     )
 }

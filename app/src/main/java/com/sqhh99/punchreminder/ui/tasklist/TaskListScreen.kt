@@ -55,7 +55,7 @@ fun TaskListScreen(
         modifier = modifier.testTag(TaskListScreenTag),
         topBar = {
             TopAppBar(
-                title = { Text("打卡提醒助手") },
+                title = { Text("Punch Reminder") },
                 actions = {
                     IconButton(onClick = onOpenPermissions) {
                         Icon(Icons.Default.Settings, contentDescription = "权限检查")

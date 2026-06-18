@@ -2,7 +2,7 @@ name: Release
 
 # 发布流水线（实现方案 §10）：本地推送 v* tag 即自动构建并发布到 GitHub Releases。
 #   git tag v0.5.0 -m "..." && git push origin v0.5.0
-# 当前产物为 debug 签名包（文件名含 -debug），可直接安装；正式 keystore 签名待后续里程碑。
+# 使用 GitHub Secrets 中的 release keystore 构建正式签名 APK。
 on:
   push:
     tags:
@@ -35,8 +35,36 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
 
-      - name: Unit test and assemble debug
-        run: ./gradlew testDebugUnitTest assembleDebug --stacktrace
+      - name: Validate signing secrets
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          missing=0
+          for name in RELEASE_KEYSTORE_BASE64 RELEASE_STORE_PASSWORD RELEASE_KEY_ALIAS RELEASE_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required secret: ${name}"
+              missing=1
+            fi
+          done
+          exit "${missing}"
+
+      - name: Decode release keystore
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          KEYSTORE_PATH="${RUNNER_TEMP}/release.keystore"
+          printf '%s' "${RELEASE_KEYSTORE_BASE64}" | base64 --decode > "${KEYSTORE_PATH}"
+          echo "RELEASE_STORE_FILE=${KEYSTORE_PATH}" >> "${GITHUB_ENV}"
+
+      - name: Unit test, lint and assemble release
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: ./gradlew testDebugUnitTest lint assembleRelease --stacktrace
 
       - name: Resolve metadata
         id: meta
@@ -53,8 +81,8 @@ jobs:
       - name: Rename APK
         id: apk
         run: |
-          SRC=app/build/outputs/apk/debug/app-debug.apk
-          DEST="PunchReminder-${{ steps.meta.outputs.tag }}-debug.apk"
+          SRC=app/build/outputs/apk/release/app-release.apk
+          DEST="PunchReminder-${{ steps.meta.outputs.tag }}-release.apk"
           cp "$SRC" "$DEST"
           echo "path=${DEST}" >> "$GITHUB_OUTPUT"
           echo "Produced ${DEST}"
@@ -63,7 +91,7 @@ jobs:
         run: |
           TAG="${{ steps.meta.outputs.tag }}"
           APK="${{ steps.apk.outputs.path }}"
-          NOTES="内测 / 调试签名版（debug-signed），可直接安装。正式 keystore 签名待后续里程碑。"
+          NOTES="正式签名 release APK。"
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "$APK" --clobber
           else

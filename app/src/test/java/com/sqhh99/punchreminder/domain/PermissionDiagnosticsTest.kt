@@ -15,19 +15,27 @@ class PermissionDiagnosticsTest {
             notificationGranted = true,
             exactAlarmGranted = false,
             fullScreenGranted = true,
+            batteryOptimizationIgnored = false,
         )
         assertEquals(
-            listOf(PermissionType.NOTIFICATION, PermissionType.EXACT_ALARM, PermissionType.FULL_SCREEN),
+            listOf(
+                PermissionType.NOTIFICATION,
+                PermissionType.EXACT_ALARM,
+                PermissionType.FULL_SCREEN,
+                PermissionType.BATTERY_OPTIMIZATION,
+            ),
             items.map { it.type },
         )
         assertTrue(items[0].granted)
         assertFalse(items[1].granted)
         assertTrue(items[2].granted)
+        assertFalse(items[3].granted)
     }
 
     @Test
     fun allGranted_trueOnlyWhenEveryItemGranted() {
-        assertTrue(PermissionDiagnostics.allGranted(PermissionDiagnostics.build(true, true, true)))
-        assertFalse(PermissionDiagnostics.allGranted(PermissionDiagnostics.build(true, false, true)))
+        assertTrue(PermissionDiagnostics.allGranted(PermissionDiagnostics.build(true, true, true, true)))
+        assertFalse(PermissionDiagnostics.allGranted(PermissionDiagnostics.build(true, false, true, true)))
+        assertFalse(PermissionDiagnostics.allGranted(PermissionDiagnostics.build(true, true, true, false)))
     }
 }
