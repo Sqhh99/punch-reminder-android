@@ -28,7 +28,7 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
         }
 
     override fun schedule(request: AlarmScheduleRequest) {
-        val pendingIntent = createPendingIntent(request.taskId)
+        val pendingIntent = createPendingIntent(request.taskId, request.repeatIndex)
         val useExact = request.exact && canScheduleExact()
         if (useExact) {
             alarmManager.setExactAndAllowWhileIdle(
@@ -46,28 +46,33 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
     }
 
     override fun cancel(taskId: String) {
+        // 取消当天日常闹钟（repeatIndex=0）。残余的重复闹钟到点会被 ReminderTriggerHandler
+        // 的启用/激活日校验拦截跳过，无需逐个取消。
         existingPendingIntent(taskId)?.let { alarmManager.cancel(it) }
     }
 
-    private fun createPendingIntent(taskId: String): PendingIntent =
+    private fun requestCode(taskId: String, repeatIndex: Int): Int = taskId.hashCode() + repeatIndex
+
+    private fun createPendingIntent(taskId: String, repeatIndex: Int): PendingIntent =
         PendingIntent.getBroadcast(
             context,
-            taskId.hashCode(),
-            broadcastIntent(taskId),
+            requestCode(taskId, repeatIndex),
+            broadcastIntent(taskId, repeatIndex),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
     private fun existingPendingIntent(taskId: String): PendingIntent? =
         PendingIntent.getBroadcast(
             context,
-            taskId.hashCode(),
-            broadcastIntent(taskId),
+            requestCode(taskId, 0),
+            broadcastIntent(taskId, 0),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
         )
 
-    private fun broadcastIntent(taskId: String): Intent =
+    private fun broadcastIntent(taskId: String, repeatIndex: Int): Intent =
         Intent(context, AlarmReceiver::class.java).apply {
             action = AlarmReceiver.ACTION_TRIGGER
             putExtra(AlarmReceiver.EXTRA_TASK_ID, taskId)
+            putExtra(AlarmReceiver.EXTRA_REPEAT_INDEX, repeatIndex)
         }
 }

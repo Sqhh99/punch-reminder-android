@@ -129,6 +129,32 @@ class ReminderTriggerHandlerTest {
     }
 
     @Test
+    fun repeatOn_firstFire_reschedulesDailyAndOneRepeat() = runBlocking {
+        val repeatTask = task().copy(repeatReminder = true, maxReminderCount = 2, reminderIntervalMinutes = 5)
+        val repo = FakeRepo(listOf(repeatTask))
+        val alarm = FakeAlarm()
+        handler(repo, alarm, FakeNotifier(), installed = true).handle("t1", repeatIndex = 0)
+
+        // 一个次日日常闹钟（repeatIndex=0）+ 一个重复提醒（repeatIndex=1）
+        assertEquals(2, alarm.scheduled.size)
+        assertEquals(setOf(0, 1), alarm.scheduled.map { it.repeatIndex }.toSet())
+    }
+
+    @Test
+    fun repeatOn_lastRepeat_noFurtherScheduleNorDaily() = runBlocking {
+        val repeatTask = task().copy(repeatReminder = true, maxReminderCount = 2, reminderIntervalMinutes = 5)
+        val repo = FakeRepo(listOf(repeatTask))
+        val alarm = FakeAlarm()
+        val notifier = FakeNotifier()
+        val outcome = handler(repo, alarm, notifier, installed = true).handle("t1", repeatIndex = 1)
+
+        assertEquals(TriggerOutcome.NOTIFIED_AND_RESCHEDULED, outcome)
+        assertEquals(1, notifier.sent.size)
+        // 已是最后一次：不再排重复，也不重排次日（次日由首次触发负责）。
+        assertTrue(alarm.scheduled.isEmpty())
+    }
+
+    @Test
     fun wrongDay_skipsNotifyButReschedules() = runBlocking {
         // 今天周四；任务只在周一执行
         val repo = FakeRepo(listOf(task(schedule = TaskSchedule.custom(setOf(DayOfWeek.MONDAY)))))

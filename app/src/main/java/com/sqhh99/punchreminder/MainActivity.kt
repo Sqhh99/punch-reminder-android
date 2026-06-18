@@ -19,10 +19,12 @@ import com.sqhh99.punchreminder.di.AppContainer
 import com.sqhh99.punchreminder.system.launcher.LaunchResult
 import com.sqhh99.punchreminder.system.permission.NotificationPermission
 import com.sqhh99.punchreminder.ui.apppicker.AppPickerScreen
+import com.sqhh99.punchreminder.ui.permission.PermissionScreen
 import com.sqhh99.punchreminder.ui.taskedit.TaskEditScreen
 import com.sqhh99.punchreminder.ui.tasklist.TaskListScreen
 import com.sqhh99.punchreminder.ui.theme.PunchReminderTheme
 import com.sqhh99.punchreminder.viewmodel.AppPickerViewModel
+import com.sqhh99.punchreminder.viewmodel.PermissionViewModel
 import com.sqhh99.punchreminder.viewmodel.TaskEditViewModel
 import com.sqhh99.punchreminder.viewmodel.TaskListViewModel
 
@@ -42,6 +44,7 @@ class MainActivity : ComponentActivity() {
 private sealed interface Route {
     data object Home : Route
     data class Edit(val taskId: String?) : Route
+    data object Permissions : Route
 }
 
 @Composable
@@ -70,6 +73,7 @@ private fun AppRoot(container: AppContainer) {
                 onEditTask = { route = Route.Edit(it) },
                 onToggleEnabled = vm::toggleEnabled,
                 onDelete = vm::delete,
+                onOpenPermissions = { route = Route.Permissions },
             )
         }
 
@@ -78,6 +82,17 @@ private fun AppRoot(container: AppContainer) {
                 container = container,
                 taskId = current.taskId,
                 onDone = { route = Route.Home },
+            )
+        }
+
+        is Route.Permissions -> {
+            val permVm: PermissionViewModel = viewModel(factory = container.permissionFactory())
+            val permState by permVm.uiState.collectAsState()
+            PermissionScreen(
+                state = permState,
+                onBack = { route = Route.Home },
+                onRefresh = permVm::refresh,
+                onOpenSettings = { container.permissionSettingsLauncher.open(it) },
             )
         }
     }
@@ -137,6 +152,8 @@ private fun EditFlow(
             onLockScreenAlertChange = editVm::setLockScreenAlert,
             onEnabledChange = editVm::setEnabled,
             onRepeatReminderChange = editVm::setRepeatReminder,
+            onReminderIntervalChange = editVm::setReminderInterval,
+            onMaxReminderCountChange = editVm::setMaxReminderCount,
             onSave = editVm::save,
         )
     }

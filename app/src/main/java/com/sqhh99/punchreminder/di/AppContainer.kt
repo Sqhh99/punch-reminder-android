@@ -18,7 +18,10 @@ import com.sqhh99.punchreminder.system.alarm.AlarmScheduler
 import com.sqhh99.punchreminder.system.launcher.AppLauncher
 import com.sqhh99.punchreminder.system.launcher.InstalledAppProvider
 import com.sqhh99.punchreminder.system.notification.NotificationDispatcher
+import com.sqhh99.punchreminder.system.permission.PermissionInspector
+import com.sqhh99.punchreminder.system.permission.PermissionSettingsLauncher
 import com.sqhh99.punchreminder.viewmodel.AppPickerViewModel
+import com.sqhh99.punchreminder.viewmodel.PermissionViewModel
 import com.sqhh99.punchreminder.viewmodel.TaskEditViewModel
 import com.sqhh99.punchreminder.viewmodel.TaskListViewModel
 
@@ -43,6 +46,8 @@ class AppContainer(private val appContext: Context) {
     val installedAppProvider: InstalledAppProvider by lazy { InstalledAppProvider(appContext) }
     val alarmScheduler: AlarmScheduler by lazy { AlarmScheduler(appContext) }
     val notificationDispatcher: NotificationDispatcher by lazy { NotificationDispatcher(appContext) }
+    val permissionSettingsLauncher: PermissionSettingsLauncher by lazy { PermissionSettingsLauncher(appContext) }
+    private val permissionInspector: PermissionInspector by lazy { PermissionInspector(appContext, alarmScheduler) }
 
     val taskScheduler: TaskScheduler by lazy {
         TaskScheduler(repository, alarmScheduler, requestBuilder)
@@ -72,5 +77,9 @@ class AppContainer(private val appContext: Context) {
 
     fun appPickerFactory(): ViewModelProvider.Factory = viewModelFactory {
         initializer { AppPickerViewModel(installedAppProvider, ownPackage) }
+    }
+
+    fun permissionFactory(): ViewModelProvider.Factory = viewModelFactory {
+        initializer { PermissionViewModel(permissionInspector) }
     }
 }
