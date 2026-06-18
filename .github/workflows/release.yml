@@ -1,0 +1,86 @@
+name: Release
+
+# 发布流水线（实现方案 §10）：本地推送 v* tag 即自动构建并发布到 GitHub Releases。
+#   git tag v0.5.0 -m "..." && git push origin v0.5.0
+# 当前产物为 debug 签名包（文件名含 -debug），可直接安装；正式 keystore 签名待后续里程碑。
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Unit test and assemble debug
+        run: ./gradlew testDebugUnitTest assembleDebug --stacktrace
+
+      - name: Resolve metadata
+        id: meta
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION_NAME=$(grep -E "^\s*versionName\s*=" app/build.gradle.kts | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
+          # 软校验：tag（去掉前缀 v）应与 build.gradle 的 versionName 一致，不一致仅告警不阻断。
+          if [ "${TAG#v}" != "${VERSION_NAME}" ]; then
+            echo "::warning::Tag ${TAG} 与 versionName ${VERSION_NAME} 不一致，请确认 app/build.gradle.kts 版本号。"
+          fi
+
+      - name: Rename APK
+        id: apk
+        run: |
+          SRC=app/build/outputs/apk/debug/app-debug.apk
+          DEST="PunchReminder-${{ steps.meta.outputs.tag }}-debug.apk"
+          cp "$SRC" "$DEST"
+          echo "path=${DEST}" >> "$GITHUB_OUTPUT"
+          echo "Produced ${DEST}"
+
+      - name: Create or update GitHub Release
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          APK="${{ steps.apk.outputs.path }}"
+          NOTES="内测 / 调试签名版（debug-signed），可直接安装。正式 keystore 签名待后续里程碑。"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK" --clobber
+          else
+            gh release create "$TAG" "$APK" \
+              --title "$TAG" \
+              --notes "$NOTES" \
+              --generate-notes
+          fi
+
+      - name: Build summary
+        if: always()
+        run: |
+          {
+            echo "### Release"
+            echo ""
+            echo "- Tag: ${{ steps.meta.outputs.tag }}"
+            echo "- Version: ${{ steps.meta.outputs.version }}"
+            echo "- APK: ${{ steps.apk.outputs.path }}"
+            echo "- Release: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.meta.outputs.tag }}"
+          } >> "$GITHUB_STEP_SUMMARY"
