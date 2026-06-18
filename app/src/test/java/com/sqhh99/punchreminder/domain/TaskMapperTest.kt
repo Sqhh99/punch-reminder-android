@@ -23,12 +23,22 @@ class TaskMapperTest {
             targetAppLabel = "企业微信",
             enabled = false,
             autoLaunch = false,
+            lockScreenAlert = false,
             repeatReminder = true,
             reminderIntervalMinutes = 10,
             maxReminderCount = 3,
         )
         val restored = TaskMapper.toDomain(TaskMapper.toDto(task))
         assertEquals(task, restored)
+    }
+
+    @Test
+    fun lockScreenAlert_roundTripsBothValues() {
+        val base = PunchTask(id = "x", name = "n", hour = 9, minute = 0, schedule = TaskSchedule.Daily)
+        listOf(true, false).forEach { value ->
+            val restored = TaskMapper.toDomain(TaskMapper.toDto(base.copy(lockScreenAlert = value)))
+            assertEquals(value, restored.lockScreenAlert)
+        }
     }
 
     @Test

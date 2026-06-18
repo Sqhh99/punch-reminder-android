@@ -7,6 +7,8 @@ data class NotificationContent(
     val title: String,
     val text: String,
     val showOpenAction: Boolean,
+    /** 是否用全屏提醒页（Full-screen Intent）做锁屏强提醒。 */
+    val useFullScreen: Boolean,
 )
 
 /**
@@ -26,6 +28,7 @@ class NotificationContentBuilder {
             title = title,
             text = text,
             showOpenAction = appLabel != null,
+            useFullScreen = task.lockScreenAlert,
         )
     }
 }

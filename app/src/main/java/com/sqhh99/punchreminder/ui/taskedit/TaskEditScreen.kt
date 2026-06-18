@@ -58,6 +58,7 @@ fun TaskEditScreen(
     onPickApp: () -> Unit,
     onTestOpen: () -> Unit,
     onAutoLaunchChange: (Boolean) -> Unit,
+    onLockScreenAlertChange: (Boolean) -> Unit,
     onEnabledChange: (Boolean) -> Unit,
     onRepeatReminderChange: (Boolean) -> Unit,
     onSave: () -> Unit,
@@ -157,6 +158,7 @@ fun TaskEditScreen(
 
             // 开关
             SwitchRow("到点自动尝试打开目标应用", state.autoLaunch, onAutoLaunchChange)
+            SwitchRow("锁屏强提醒（到点全屏弹出）", state.lockScreenAlert, onLockScreenAlertChange)
             SwitchRow("启用此任务", state.enabled, onEnabledChange)
             SwitchRow("重复提醒（完整功能后续版本）", state.repeatReminder, onRepeatReminderChange)
 

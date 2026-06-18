@@ -15,6 +15,7 @@ import java.util.UUID
  * @param targetAppLabel 目标应用显示名（缓存，便于列表展示）。
  * @param enabled 是否启用。
  * @param autoLaunch 触发时是否尝试自动打开目标应用。
+ * @param lockScreenAlert 是否启用锁屏强提醒（到点弹出可越锁屏的全屏提醒页）。
  * @param repeatReminder 是否重复提醒（完整实现见 0.7.0）。
  * @param reminderIntervalMinutes 重复提醒间隔（分钟）。
  * @param maxReminderCount 最大提醒次数。
@@ -29,6 +30,7 @@ data class PunchTask(
     val targetAppLabel: String? = null,
     val enabled: Boolean = true,
     val autoLaunch: Boolean = true,
+    val lockScreenAlert: Boolean = true,
     val repeatReminder: Boolean = false,
     val reminderIntervalMinutes: Int = 5,
     val maxReminderCount: Int = 2,
