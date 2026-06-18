@@ -1,10 +1,10 @@
-# 打卡提醒助手 (punch-reminder-android)
+# Punch Reminder (punch-reminder-android)
 
 [![PR Check](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/pr-check.yml/badge.svg)](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/pr-check.yml)
 [![Main Build](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/main-build.yml/badge.svg)](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/main-build.yml)
 [![Release](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/release.yml/badge.svg)](https://github.com/Sqhh99/punch-reminder-android/actions/workflows/release.yml)
 
-上下班打卡提醒助手 / 定时应用启动助手。在用户授权和主动配置的前提下，于指定时间提醒用户，
+Punch Reminder 是上下班打卡提醒 / 定时应用启动助手。在用户授权和主动配置的前提下，于指定时间提醒用户，
 并尽可能自动拉起指定打卡应用，降低忘记打卡的概率。
 
 > 详细需求见 [需求说明](Requirements-Specification-for-Android-Scheduled-Clock-in-Tool.md)，
@@ -39,6 +39,7 @@ app/src/main/java/com/sqhh99/punchreminder/
 
 ```bash
 ./gradlew assembleDebug        # 构建 debug APK
+./gradlew assembleRelease      # 构建正式 release APK（需要签名环境变量）
 ./gradlew testDebugUnitTest    # 运行本地单元测试
 ./gradlew lint                 # Android Lint
 ```
@@ -56,7 +57,7 @@ app/src/main/java/com/sqhh99/punchreminder/
 - **PR Check**（`.github/workflows/pr-check.yml`）：wrapper 校验 + Lint + 单元测试 + debug 构建，快速反馈。
 - **Main Build**（`.github/workflows/main-build.yml`）：合并到 main 后产出可追溯命名的 debug APK
   （`PunchReminder-debug-<version>-main-<shortsha>.apk`）及测试/lint 报告 artifact。
-- **Release**（`.github/workflows/release.yml`）：推送 `v*` tag 后自动构建并发布到 GitHub Releases。
+- **Release**（`.github/workflows/release.yml`）：推送 `v*` tag 后自动构建正式签名 release APK 并发布到 GitHub Releases。
 - nightly 流水线将在后续里程碑加入。
 
 ## 发布（Release）
@@ -69,8 +70,13 @@ git tag v0.5.0 -m "0.5.0 开机恢复 + Release 流水线"
 git push origin v0.5.0
 ```
 
-工作流构建 `PunchReminder-v<tag>-debug.apk` 并创建对应 Release。当前为 **debug 签名**包，可直接安装；
-正式 keystore 签名（通过 GitHub Secrets 注入，不提交密钥）留待后续里程碑。
+工作流构建 `PunchReminder-<tag>-release.apk` 并创建对应 Release。正式签名通过 GitHub Secrets 注入，
+不要提交 keystore 或密码。需要配置：
+
+- `RELEASE_KEYSTORE_BASE64`
+- `RELEASE_STORE_PASSWORD`
+- `RELEASE_KEY_ALIAS`
+- `RELEASE_KEY_PASSWORD`
 
 ## 能力边界（实现方案 §20）
 

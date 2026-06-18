@@ -28,7 +28,7 @@ class NotificationDispatcher(
     fun ensureChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "打卡提醒",
+            "Punch Reminder",
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description = "上下班打卡时间到点提醒"

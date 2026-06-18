@@ -10,6 +10,9 @@ enum class PermissionType {
 
     /** 全屏提醒（USE_FULL_SCREEN_INTENT，Android 14+ 锁屏全屏弹出）。 */
     FULL_SCREEN,
+
+    /** 电池优化白名单，用于降低后台提醒被系统延后或拦截的概率。 */
+    BATTERY_OPTIMIZATION,
 }
 
 /** 单项权限状态。[granted] 为 false 时引导用户去系统设置开启。 */
@@ -27,10 +30,12 @@ object PermissionDiagnostics {
         notificationGranted: Boolean,
         exactAlarmGranted: Boolean,
         fullScreenGranted: Boolean,
+        batteryOptimizationIgnored: Boolean,
     ): List<PermissionItem> = listOf(
         PermissionItem(PermissionType.NOTIFICATION, notificationGranted),
         PermissionItem(PermissionType.EXACT_ALARM, exactAlarmGranted),
         PermissionItem(PermissionType.FULL_SCREEN, fullScreenGranted),
+        PermissionItem(PermissionType.BATTERY_OPTIMIZATION, batteryOptimizationIgnored),
     )
 
     /** 是否所有项均已授予。 */

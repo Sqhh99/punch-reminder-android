@@ -9,6 +9,18 @@ android {
     namespace = "com.sqhh99.punchreminder"
     compileSdk = 35
 
+    signingConfigs {
+        create("release") {
+            val releaseStoreFile = System.getenv("RELEASE_STORE_FILE")
+            if (!releaseStoreFile.isNullOrBlank()) {
+                storeFile = file(releaseStoreFile)
+            }
+            storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+            keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+            keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.sqhh99.punchreminder"
         minSdk = 26
@@ -25,12 +37,12 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // 签名配置后续里程碑通过 GitHub Secrets 注入，本里程碑只构建 debug。
         }
     }
 
