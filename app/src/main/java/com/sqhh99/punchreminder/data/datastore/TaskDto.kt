@@ -20,6 +20,7 @@ data class TaskDto(
     val targetAppLabel: String? = null,
     val enabled: Boolean = true,
     val autoLaunch: Boolean = true,
+    val lockScreenAlert: Boolean = true,
     val repeatReminder: Boolean = false,
     val reminderIntervalMinutes: Int = 5,
     val maxReminderCount: Int = 2,

@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <!-- 读取「可从桌面启动的应用」列表，避免使用 QUERY_ALL_PACKAGES。 -->
     <queries>
@@ -33,6 +34,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- 锁屏全屏提醒页：由通知的 Full-screen Intent 拉起，越锁屏并点亮屏幕，仅本应用触发。 -->
+        <activity
+            android:name=".ui.alarm.AlarmActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.PunchReminder" />
 
         <receiver
             android:name=".system.receiver.AlarmReceiver"

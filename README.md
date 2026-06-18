@@ -87,7 +87,7 @@ git push origin v0.5.0
 - [x] 0.2.0 任务管理 + 本地保存
 - [x] 0.3.0 应用选择 + 手动打开目标 App
 - [x] 0.4.0 AlarmManager 定时触发 + 通知提醒
-- [x] 0.5.0 开机恢复 + tag 触发 Release 发布（本里程碑）
-- [ ] 0.6.0 锁屏提醒 + Full-screen Intent
+- [x] 0.5.0 开机恢复 + tag 触发 Release 发布
+- [x] 0.6.0 锁屏提醒 + Full-screen Intent（本里程碑）
 - [ ] 0.7.0 重复提醒 + 权限诊断
 - [ ] 1.0.0 稳定自用版本

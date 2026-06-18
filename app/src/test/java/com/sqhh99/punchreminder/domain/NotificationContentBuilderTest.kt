@@ -11,10 +11,11 @@ class NotificationContentBuilderTest {
 
     private val builder = NotificationContentBuilder()
 
-    private fun task(label: String? = null, autoLaunch: Boolean = true) =
+    private fun task(label: String? = null, autoLaunch: Boolean = true, lockScreenAlert: Boolean = true) =
         PunchTask(
             name = "上班打卡", hour = 9, minute = 0, schedule = TaskSchedule.Daily,
-            targetPackage = label?.let { "com.example" }, targetAppLabel = label, autoLaunch = autoLaunch,
+            targetPackage = label?.let { "com.example" }, targetAppLabel = label,
+            autoLaunch = autoLaunch, lockScreenAlert = lockScreenAlert,
         )
 
     @Test
@@ -33,5 +34,15 @@ class NotificationContentBuilderTest {
     fun withoutTargetApp_noOpenAction() {
         val content = builder.build(task(label = null))
         assertFalse(content.showOpenAction)
+    }
+
+    @Test
+    fun lockScreenAlertOn_usesFullScreen() {
+        assertTrue(builder.build(task(lockScreenAlert = true)).useFullScreen)
+    }
+
+    @Test
+    fun lockScreenAlertOff_noFullScreen() {
+        assertFalse(builder.build(task(lockScreenAlert = false)).useFullScreen)
     }
 }

@@ -29,6 +29,7 @@ data class TaskEditUiState(
     val targetInstalled: Boolean = true,
     val enabled: Boolean = true,
     val autoLaunch: Boolean = true,
+    val lockScreenAlert: Boolean = true,
     val repeatReminder: Boolean = false,
     val reminderIntervalMinutes: Int = 5,
     val maxReminderCount: Int = 2,
@@ -65,6 +66,7 @@ class TaskEditViewModel(
         it.copy(customDays = days)
     }
     fun setAutoLaunch(value: Boolean) = _uiState.update { it.copy(autoLaunch = value) }
+    fun setLockScreenAlert(value: Boolean) = _uiState.update { it.copy(lockScreenAlert = value) }
     fun setEnabled(value: Boolean) = _uiState.update { it.copy(enabled = value) }
     fun setRepeatReminder(value: Boolean) = _uiState.update { it.copy(repeatReminder = value) }
     fun setReminderInterval(minutes: Int) = _uiState.update { it.copy(reminderIntervalMinutes = minutes) }
@@ -104,6 +106,7 @@ class TaskEditViewModel(
             targetAppLabel = targetAppLabel,
             enabled = enabled,
             autoLaunch = autoLaunch,
+            lockScreenAlert = lockScreenAlert,
             repeatReminder = repeatReminder,
             reminderIntervalMinutes = reminderIntervalMinutes,
             maxReminderCount = maxReminderCount,
@@ -122,6 +125,7 @@ class TaskEditViewModel(
         targetInstalled = installChecker.isInstalled(targetPackage),
         enabled = enabled,
         autoLaunch = autoLaunch,
+        lockScreenAlert = lockScreenAlert,
         repeatReminder = repeatReminder,
         reminderIntervalMinutes = reminderIntervalMinutes,
         maxReminderCount = maxReminderCount,

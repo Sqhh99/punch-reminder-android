@@ -14,10 +14,11 @@ import com.sqhh99.punchreminder.domain.model.PunchTask
 import com.sqhh99.punchreminder.domain.notification.NotificationContentBuilder
 import com.sqhh99.punchreminder.domain.usecase.NotificationGateway
 import com.sqhh99.punchreminder.system.permission.NotificationPermission
+import com.sqhh99.punchreminder.ui.alarm.AlarmActivity
 
 /**
- * 发送提醒通知（实现方案 §5）。本里程碑实现普通 + 高优先级通知；
- * 锁屏 / 全屏 Intent 增强属 0.6.0。
+ * 发送提醒通知（实现方案 §5）。普通 + 高优先级通知；任务开启「锁屏强提醒」时附
+ * Full-screen Intent，在锁屏/息屏时拉起 [AlarmActivity] 全屏提醒页（0.6.0）。
  */
 class NotificationDispatcher(
     private val context: Context,
@@ -48,9 +49,14 @@ class NotificationDispatcher(
             .setContentTitle(content.title)
             .setContentText(content.text)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setCategory(if (content.useFullScreen) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(contentIntent(task, openTargetApp))
+
+        if (content.useFullScreen) {
+            // 锁屏/息屏时拉起全屏提醒页；屏幕亮起时系统降级为 heads-up 通知。
+            builder.setFullScreenIntent(fullScreenIntent(task), true)
+        }
 
         if (content.showOpenAction) {
             builder.addAction(
@@ -73,6 +79,22 @@ class NotificationDispatcher(
             context,
             task.id.hashCode(),
             launchIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+    }
+
+    private fun fullScreenIntent(task: PunchTask): PendingIntent {
+        val intent = Intent(context, AlarmActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra(AlarmActivity.EXTRA_TASK_ID, task.id)
+            putExtra(AlarmActivity.EXTRA_TASK_NAME, task.name)
+            putExtra(AlarmActivity.EXTRA_APP_LABEL, task.targetAppLabel)
+            putExtra(AlarmActivity.EXTRA_TARGET_PACKAGE, task.targetPackage)
+        }
+        return PendingIntent.getActivity(
+            context,
+            task.id.hashCode() + 2,
+            intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
     }

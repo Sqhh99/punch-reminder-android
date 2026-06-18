@@ -134,6 +134,7 @@ private fun EditFlow(
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             },
             onAutoLaunchChange = editVm::setAutoLaunch,
+            onLockScreenAlertChange = editVm::setLockScreenAlert,
             onEnabledChange = editVm::setEnabled,
             onRepeatReminderChange = editVm::setRepeatReminder,
             onSave = editVm::save,
