@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
  * 否则已启用的提醒会全部失效。这里仅做框架黏合，真正的调度逻辑在可单测的
  * [com.sqhh99.punchreminder.domain.usecase.TaskScheduler.rescheduleAll] 中。
  *
- * 监听的均为系统受保护广播（第三方无法伪造），故 receiver 声明为 exported=false。
+ * 监听的均为系统受保护广播（第三方无法伪造）。
  */
 class BootReceiver : BroadcastReceiver() {
 
@@ -40,6 +40,10 @@ class BootReceiver : BroadcastReceiver() {
             Intent.ACTION_MY_PACKAGE_REPLACED,
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_TIME_CHANGED,
+            ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
         )
+
+        const val ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED =
+            "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED"
     }
 }

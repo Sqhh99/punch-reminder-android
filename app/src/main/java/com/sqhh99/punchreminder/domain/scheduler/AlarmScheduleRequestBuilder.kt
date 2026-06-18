@@ -14,6 +14,7 @@ data class AlarmScheduleRequest(
     val triggerAtMillis: Long,
     val exact: Boolean,
     val repeatIndex: Int = 0,
+    val alarmClock: Boolean = repeatIndex == 0,
 )
 
 /**
@@ -41,6 +42,7 @@ class AlarmScheduleRequestBuilder(
             triggerAtMillis = triggerAtMillis,
             exact = exactAllowed,
             repeatIndex = 0,
+            alarmClock = true,
         )
     }
 
@@ -61,6 +63,7 @@ class AlarmScheduleRequestBuilder(
             triggerAtMillis = triggerAt.atZone(zoneId).toInstant().toEpochMilli(),
             exact = exactAllowed,
             repeatIndex = repeatIndex,
+            alarmClock = false,
         )
     }
 }
