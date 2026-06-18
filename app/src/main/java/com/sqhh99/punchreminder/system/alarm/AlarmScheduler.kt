@@ -28,7 +28,7 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
         }
 
     override fun schedule(request: AlarmScheduleRequest) {
-        val pendingIntent = pendingIntentFor(request.taskId, create = true)
+        val pendingIntent = createPendingIntent(request.taskId)
         val useExact = request.exact && canScheduleExact()
         if (useExact) {
             alarmManager.setExactAndAllowWhileIdle(
@@ -46,16 +46,28 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
     }
 
     override fun cancel(taskId: String) {
-        pendingIntentFor(taskId, create = false)?.let { alarmManager.cancel(it) }
+        existingPendingIntent(taskId)?.let { alarmManager.cancel(it) }
     }
 
-    private fun pendingIntentFor(taskId: String, create: Boolean): PendingIntent? {
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
+    private fun createPendingIntent(taskId: String): PendingIntent =
+        PendingIntent.getBroadcast(
+            context,
+            taskId.hashCode(),
+            broadcastIntent(taskId),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
+    private fun existingPendingIntent(taskId: String): PendingIntent? =
+        PendingIntent.getBroadcast(
+            context,
+            taskId.hashCode(),
+            broadcastIntent(taskId),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
+        )
+
+    private fun broadcastIntent(taskId: String): Intent =
+        Intent(context, AlarmReceiver::class.java).apply {
             action = AlarmReceiver.ACTION_TRIGGER
             putExtra(AlarmReceiver.EXTRA_TASK_ID, taskId)
         }
-        var flags = PendingIntent.FLAG_IMMUTABLE
-        flags = flags or if (create) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_NO_CREATE
-        return PendingIntent.getBroadcast(context, taskId.hashCode(), intent, flags)
-    }
 }
