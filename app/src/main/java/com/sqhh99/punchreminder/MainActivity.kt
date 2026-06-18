@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqhh99.punchreminder.di.AppContainer
 import com.sqhh99.punchreminder.system.launcher.LaunchResult
@@ -105,8 +108,18 @@ private fun EditFlow(
     onDone: () -> Unit,
 ) {
     val context = LocalContext.current
+    // 把编辑页 ViewModel 的生命周期绑定到本编辑会话：离开编辑页即清理，
+    // 避免 Activity 级缓存导致再次进入时拿到上次「已保存」的陈旧状态而异常退出。
+    val editOwner = remember(taskId) {
+        object : ViewModelStoreOwner {
+            override val viewModelStore = ViewModelStore()
+        }
+    }
+    DisposableEffect(editOwner) {
+        onDispose { editOwner.viewModelStore.clear() }
+    }
     val editVm: TaskEditViewModel = viewModel(
-        key = "edit_${taskId ?: "new"}",
+        viewModelStoreOwner = editOwner,
         factory = container.taskEditFactory(taskId),
     )
     val state by editVm.uiState.collectAsState()
