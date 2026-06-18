@@ -1,0 +1,55 @@
+name: PR Check
+
+# PR 检查流水线（实现方案 §9）：快速反馈，几分钟内完成。
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+# 同一 PR 的新提交会取消上一次仍在运行的检查，节省额度。
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Lint + Unit Test + Debug Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Lint, unit test and assemble debug
+        run: ./gradlew lint testDebugUnitTest assembleDebug --stacktrace
+
+      - name: Upload unit test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-unit-test-report
+          path: app/build/reports/tests/
+          retention-days: 7
+
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-lint-report
+          path: app/build/reports/lint-results-*.html
+          retention-days: 7
