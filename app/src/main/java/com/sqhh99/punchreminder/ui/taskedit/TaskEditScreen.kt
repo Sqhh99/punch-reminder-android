@@ -61,6 +61,8 @@ fun TaskEditScreen(
     onLockScreenAlertChange: (Boolean) -> Unit,
     onEnabledChange: (Boolean) -> Unit,
     onRepeatReminderChange: (Boolean) -> Unit,
+    onReminderIntervalChange: (Int) -> Unit,
+    onMaxReminderCountChange: (Int) -> Unit,
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -160,7 +162,21 @@ fun TaskEditScreen(
             SwitchRow("到点自动尝试打开目标应用", state.autoLaunch, onAutoLaunchChange)
             SwitchRow("锁屏强提醒（到点全屏弹出）", state.lockScreenAlert, onLockScreenAlertChange)
             SwitchRow("启用此任务", state.enabled, onEnabledChange)
-            SwitchRow("重复提醒（完整功能后续版本）", state.repeatReminder, onRepeatReminderChange)
+            SwitchRow("重复提醒（未处理时再次提醒）", state.repeatReminder, onRepeatReminderChange)
+            if (state.repeatReminder) {
+                StepperRow(
+                    label = "提醒间隔",
+                    valueText = "${state.reminderIntervalMinutes} 分钟",
+                    onMinus = { onReminderIntervalChange((state.reminderIntervalMinutes - 1).coerceAtLeast(1)) },
+                    onPlus = { onReminderIntervalChange((state.reminderIntervalMinutes + 1).coerceAtMost(60)) },
+                )
+                StepperRow(
+                    label = "最多提醒次数",
+                    valueText = "${state.maxReminderCount} 次",
+                    onMinus = { onMaxReminderCountChange((state.maxReminderCount - 1).coerceAtLeast(1)) },
+                    onPlus = { onMaxReminderCountChange((state.maxReminderCount + 1).coerceAtMost(10)) },
+                )
+            }
 
             Button(
                 onClick = onSave,
@@ -188,6 +204,30 @@ fun TaskEditScreen(
             },
             text = { TimePicker(state = timeState) },
         )
+    }
+}
+
+@Composable
+private fun StepperRow(
+    label: String,
+    valueText: String,
+    onMinus: () -> Unit,
+    onPlus: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, modifier = Modifier.padding(end = 8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedButton(onClick = onMinus) { Text("−") }
+            Text(valueText, style = MaterialTheme.typography.bodyLarge)
+            OutlinedButton(onClick = onPlus) { Text("+") }
+        }
     }
 }
 

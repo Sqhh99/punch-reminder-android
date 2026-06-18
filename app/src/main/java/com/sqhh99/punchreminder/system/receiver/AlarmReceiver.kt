@@ -17,11 +17,12 @@ class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != ACTION_TRIGGER) return
         val taskId = intent.getStringExtra(EXTRA_TASK_ID) ?: return
+        val repeatIndex = intent.getIntExtra(EXTRA_REPEAT_INDEX, 0)
         val container = (context.applicationContext as PunchReminderApp).container
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                container.reminderTriggerHandler.handle(taskId)
+                container.reminderTriggerHandler.handle(taskId, repeatIndex)
             } finally {
                 pendingResult.finish()
             }
@@ -31,5 +32,6 @@ class AlarmReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_TRIGGER = "com.sqhh99.punchreminder.action.ALARM_TRIGGER"
         const val EXTRA_TASK_ID = "task_id"
+        const val EXTRA_REPEAT_INDEX = "repeat_index"
     }
 }

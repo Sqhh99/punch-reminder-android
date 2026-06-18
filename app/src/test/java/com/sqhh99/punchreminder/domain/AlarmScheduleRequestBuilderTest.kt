@@ -46,4 +46,31 @@ class AlarmScheduleRequestBuilderTest {
         val request = builder.build(task(), now, exactAllowed = false)!!
         assertEquals(false, request.exact)
     }
+
+    private fun repeatTask(enabled: Boolean = true, repeat: Boolean = true, interval: Int = 5) =
+        PunchTask(
+            id = "t1", name = "t", hour = 9, minute = 0, schedule = TaskSchedule.Daily,
+            enabled = enabled, repeatReminder = repeat, reminderIntervalMinutes = interval,
+        )
+
+    @Test
+    fun buildRepeat_addsIntervalAndIndex() {
+        val now = LocalDateTime.of(2026, 6, 18, 9, 0)
+        val request = builder.buildRepeat(repeatTask(interval = 5), now, exactAllowed = true, repeatIndex = 2)!!
+        val expected = LocalDateTime.of(2026, 6, 18, 9, 5).atZone(zone).toInstant().toEpochMilli()
+        assertEquals(expected, request.triggerAtMillis)
+        assertEquals(2, request.repeatIndex)
+    }
+
+    @Test
+    fun buildRepeat_repeatOff_returnsNull() {
+        val now = LocalDateTime.of(2026, 6, 18, 9, 0)
+        assertNull(builder.buildRepeat(repeatTask(repeat = false), now, true, repeatIndex = 1))
+    }
+
+    @Test
+    fun buildRepeat_disabled_returnsNull() {
+        val now = LocalDateTime.of(2026, 6, 18, 9, 0)
+        assertNull(builder.buildRepeat(repeatTask(enabled = false), now, true, repeatIndex = 1))
+    }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -47,11 +48,21 @@ fun TaskListScreen(
     onEditTask: (String) -> Unit,
     onToggleEnabled: (String, Boolean) -> Unit,
     onDelete: (String) -> Unit,
+    onOpenPermissions: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.testTag(TaskListScreenTag),
-        topBar = { TopAppBar(title = { Text("打卡提醒助手") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("打卡提醒助手") },
+                actions = {
+                    IconButton(onClick = onOpenPermissions) {
+                        Icon(Icons.Default.Settings, contentDescription = "权限检查")
+                    }
+                },
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddTask) {
                 Icon(Icons.Default.Add, contentDescription = "新增任务")
