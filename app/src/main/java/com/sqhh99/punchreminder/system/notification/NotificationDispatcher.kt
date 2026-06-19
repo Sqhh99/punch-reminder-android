@@ -36,6 +36,19 @@ class NotificationDispatcher(
         NotificationManagerCompat.from(context).createNotificationChannel(channel)
     }
 
+    /** 保活前台服务的常驻通知渠道：最低优先级、无声、无横幅（0.8.0）。 */
+    fun ensureServiceChannel() {
+        val channel = NotificationChannel(
+            SERVICE_CHANNEL_ID,
+            "提醒保活",
+            NotificationManager.IMPORTANCE_MIN,
+        ).apply {
+            description = "保持后台运行以确保退出应用后仍能按时提醒"
+            setShowBadge(false)
+        }
+        NotificationManagerCompat.from(context).createNotificationChannel(channel)
+    }
+
     /** 发送任务提醒。[openTargetApp] 为 true 时点击通知直接打开目标应用，否则打开本应用。 */
     @SuppressLint("MissingPermission") // 已在上方显式校验 POST_NOTIFICATIONS
     override fun notify(task: PunchTask, openTargetApp: Boolean) {
@@ -114,5 +127,6 @@ class NotificationDispatcher(
 
     companion object {
         const val CHANNEL_ID = "punch_reminder"
+        const val SERVICE_CHANNEL_ID = "punch_reminder_service"
     }
 }

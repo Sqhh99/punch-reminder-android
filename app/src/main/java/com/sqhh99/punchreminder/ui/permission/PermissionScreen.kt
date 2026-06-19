@@ -94,7 +94,9 @@ fun PermissionScreen(
             }
             item {
                 Text(
-                    text = "说明：主提醒使用系统闹钟方式调度；如果在系统设置中强行停止应用，Android 仍会取消后续提醒。",
+                    text = "说明：主提醒使用系统闹钟方式调度，应用已常驻一条无声通知用于后台保活。\n" +
+                        "国产手机（OPPO/vivo/小米/华为等）请在「自启动管理 / 允许后台活动」中允许本应用，" +
+                        "并尽量不要从最近任务中划掉本应用——否则系统会强行停止应用并取消后续全部提醒。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -145,5 +147,5 @@ private fun permissionInfo(type: PermissionType): PermissionInfo = when (type) {
     PermissionType.NOTIFICATION -> PermissionInfo("通知权限", "到点发送打卡提醒通知。")
     PermissionType.EXACT_ALARM -> PermissionInfo("闹钟和提醒", "允许使用系统闹钟能力，在退出应用后仍尽量准时提醒。")
     PermissionType.FULL_SCREEN -> PermissionInfo("全屏提醒", "锁屏/息屏时弹出全屏提醒页，更不易错过。")
-    PermissionType.BATTERY_OPTIMIZATION -> PermissionInfo("后台电池限制", "允许后台运行，降低退出应用后提醒被系统拦截的概率。")
+    PermissionType.BATTERY_OPTIMIZATION -> PermissionInfo("后台电池限制", "关系到退出应用后能否持续提醒，建议关闭电池优化并允许后台运行/自启动。")
 }

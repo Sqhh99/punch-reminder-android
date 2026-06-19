@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- 读取「可从桌面启动的应用」列表，避免使用 QUERY_ALL_PACKAGES。 -->
     <queries>
@@ -43,6 +45,16 @@
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:theme="@style/Theme.PunchReminder" />
+
+        <!-- 常驻保活前台服务：降低国产 ROM 划掉应用后被杀、闹钟被取消导致漏提醒的概率（仅本应用使用）。 -->
+        <service
+            android:name=".system.service.ReminderForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="punch_reminder_keepalive" />
+        </service>
 
         <receiver
             android:name=".system.receiver.AlarmReceiver"

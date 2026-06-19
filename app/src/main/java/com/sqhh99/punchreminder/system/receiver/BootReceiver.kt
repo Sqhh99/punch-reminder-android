@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.sqhh99.punchreminder.PunchReminderApp
+import com.sqhh99.punchreminder.system.service.ReminderForegroundService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +27,8 @@ class BootReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 container.taskScheduler.rescheduleAll()
+                // 开机是后台启动前台服务的系统豁免场景，重排后顺带拉起保活服务。
+                ReminderForegroundService.start(context)
             } finally {
                 pendingResult.finish()
             }
