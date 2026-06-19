@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.sqhh99.punchreminder.MainActivity
 import com.sqhh99.punchreminder.R
 import com.sqhh99.punchreminder.domain.model.PunchTask
 import com.sqhh99.punchreminder.domain.notification.NotificationContentBuilder
@@ -82,16 +81,20 @@ class NotificationDispatcher(
         NotificationManagerCompat.from(context).notify(task.id.hashCode(), builder.build())
     }
 
+    /**
+     * 点击通知主体：经 [NotificationActionActivity] 中转，先取消通知再启动目标，
+     * 保证通知被清理（`setAutoCancel` 对操作按钮无效，且 Android 12+ 禁止广播/服务 trampoline）。
+     */
     private fun contentIntent(task: PunchTask, openTargetApp: Boolean): PendingIntent {
-        val launchIntent = task.targetPackage
-            ?.takeIf { openTargetApp }
-            ?.let { context.packageManager.getLaunchIntentForPackage(it) }
-            ?: Intent(context, MainActivity::class.java)
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val action = if (openTargetApp && !task.targetPackage.isNullOrBlank()) {
+            NotificationActionActivity.ACTION_OPEN_TARGET
+        } else {
+            NotificationActionActivity.ACTION_OPEN_MAIN
+        }
         return PendingIntent.getActivity(
             context,
             task.id.hashCode(),
-            launchIntent,
+            NotificationActionActivity.intent(context, task.id.hashCode(), action, task.targetPackage),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
     }
@@ -112,18 +115,19 @@ class NotificationDispatcher(
         )
     }
 
-    private fun openTargetAppIntent(task: PunchTask): PendingIntent {
-        val intent = task.targetPackage
-            ?.let { context.packageManager.getLaunchIntentForPackage(it) }
-            ?: Intent(context, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        return PendingIntent.getActivity(
+    /** 「打开打卡应用」操作按钮：同样经中转页，确保点击后通知被清理。 */
+    private fun openTargetAppIntent(task: PunchTask): PendingIntent =
+        PendingIntent.getActivity(
             context,
             task.id.hashCode() + 1,
-            intent,
+            NotificationActionActivity.intent(
+                context,
+                task.id.hashCode(),
+                NotificationActionActivity.ACTION_OPEN_TARGET,
+                task.targetPackage,
+            ),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
-    }
 
     companion object {
         const val CHANNEL_ID = "punch_reminder"

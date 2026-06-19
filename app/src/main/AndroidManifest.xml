@@ -23,6 +23,7 @@
         android:name=".PunchReminderApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.PunchReminder">
@@ -37,6 +38,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- 通知点击中转页（无 UI）：先取消通知再启动目标，保证点击后通知被清理。仅本应用触发。 -->
+        <activity
+            android:name=".system.notification.NotificationActionActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <!-- 锁屏全屏提醒页：由通知的 Full-screen Intent 拉起，越锁屏并点亮屏幕，仅本应用触发。 -->
         <activity
