@@ -20,6 +20,9 @@ class PunchReminderApp : Application() {
         container = AppContainer(this)
         container.notificationDispatcher.ensureChannel()
         applicationScope.launch {
+            // 先装载本地节假日缓存，再机会性联网刷新（失败不阻塞），最后按最新数据重排闹钟。
+            container.holidayCalendar.ensureLoaded()
+            runCatching { container.holidayRefresher.refreshIfStale() }
             container.taskScheduler.rescheduleAll()
         }
     }

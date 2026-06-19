@@ -19,6 +19,7 @@ import java.util.UUID
  * @param repeatReminder 是否重复提醒（完整实现见 0.7.0）。
  * @param reminderIntervalMinutes 重复提醒间隔（分钟）。
  * @param maxReminderCount 最大提醒次数。
+ * @param followStatutoryCalendar 是否遵循法定节假日/调休：开启后法定假日不提醒、调休上班日照常提醒。
  */
 data class PunchTask(
     val id: String = UUID.randomUUID().toString(),
@@ -34,6 +35,7 @@ data class PunchTask(
     val repeatReminder: Boolean = false,
     val reminderIntervalMinutes: Int = 5,
     val maxReminderCount: Int = 2,
+    val followStatutoryCalendar: Boolean = true,
 ) {
     val time: LocalTime get() = LocalTime.of(hour, minute)
 

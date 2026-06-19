@@ -5,6 +5,7 @@ import com.sqhh99.punchreminder.data.mapper.TaskMapper
 import com.sqhh99.punchreminder.domain.model.PunchTask
 import com.sqhh99.punchreminder.domain.model.ScheduleType
 import com.sqhh99.punchreminder.domain.model.TaskSchedule
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.DayOfWeek
@@ -27,9 +28,27 @@ class TaskMapperTest {
             repeatReminder = true,
             reminderIntervalMinutes = 10,
             maxReminderCount = 3,
+            followStatutoryCalendar = false,
         )
         val restored = TaskMapper.toDomain(TaskMapper.toDto(task))
         assertEquals(task, restored)
+    }
+
+    @Test
+    fun followStatutoryCalendar_roundTripsBothValues() {
+        val base = PunchTask(id = "x", name = "n", hour = 9, minute = 0, schedule = TaskSchedule.Daily)
+        listOf(true, false).forEach { value ->
+            val restored = TaskMapper.toDomain(TaskMapper.toDto(base.copy(followStatutoryCalendar = value)))
+            assertEquals(value, restored.followStatutoryCalendar)
+        }
+    }
+
+    @Test
+    fun legacyDtoWithoutFollowField_defaultsToTrue() {
+        // 旧版本持久化的 JSON 缺少 followStatutoryCalendar 字段，应解码为默认 true（向后兼容）。
+        val legacyJson = """{"id":"x","name":"n","hour":9,"minute":0,"scheduleType":"DAILY"}"""
+        val dto = Json { ignoreUnknownKeys = true }.decodeFromString<TaskDto>(legacyJson)
+        assertEquals(true, TaskMapper.toDomain(dto).followStatutoryCalendar)
     }
 
     @Test
