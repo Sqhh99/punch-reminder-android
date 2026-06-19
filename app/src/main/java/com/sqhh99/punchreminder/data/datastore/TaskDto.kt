@@ -24,4 +24,5 @@ data class TaskDto(
     val repeatReminder: Boolean = false,
     val reminderIntervalMinutes: Int = 5,
     val maxReminderCount: Int = 2,
+    val followStatutoryCalendar: Boolean = true,
 )

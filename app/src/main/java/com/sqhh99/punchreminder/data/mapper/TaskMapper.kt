@@ -24,6 +24,7 @@ object TaskMapper {
         repeatReminder = task.repeatReminder,
         reminderIntervalMinutes = task.reminderIntervalMinutes,
         maxReminderCount = task.maxReminderCount,
+        followStatutoryCalendar = task.followStatutoryCalendar,
     )
 
     fun toDomain(dto: TaskDto): PunchTask {
@@ -46,6 +47,7 @@ object TaskMapper {
             repeatReminder = dto.repeatReminder,
             reminderIntervalMinutes = dto.reminderIntervalMinutes,
             maxReminderCount = dto.maxReminderCount,
+            followStatutoryCalendar = dto.followStatutoryCalendar,
         )
     }
 }

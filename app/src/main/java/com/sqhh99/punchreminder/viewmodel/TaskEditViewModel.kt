@@ -33,6 +33,7 @@ data class TaskEditUiState(
     val repeatReminder: Boolean = false,
     val reminderIntervalMinutes: Int = 5,
     val maxReminderCount: Int = 2,
+    val followStatutoryCalendar: Boolean = true,
     val errors: List<TaskValidationError> = emptyList(),
     val saved: Boolean = false,
 ) {
@@ -71,6 +72,7 @@ class TaskEditViewModel(
     fun setRepeatReminder(value: Boolean) = _uiState.update { it.copy(repeatReminder = value) }
     fun setReminderInterval(minutes: Int) = _uiState.update { it.copy(reminderIntervalMinutes = minutes) }
     fun setMaxReminderCount(count: Int) = _uiState.update { it.copy(maxReminderCount = count) }
+    fun setFollowStatutoryCalendar(value: Boolean) = _uiState.update { it.copy(followStatutoryCalendar = value) }
 
     fun setTargetApp(packageName: String, label: String) = _uiState.update {
         it.copy(targetPackage = packageName, targetAppLabel = label, targetInstalled = true)
@@ -110,6 +112,7 @@ class TaskEditViewModel(
             repeatReminder = repeatReminder,
             reminderIntervalMinutes = reminderIntervalMinutes,
             maxReminderCount = maxReminderCount,
+            followStatutoryCalendar = followStatutoryCalendar,
         )
     }
 
@@ -129,5 +132,6 @@ class TaskEditViewModel(
         repeatReminder = repeatReminder,
         reminderIntervalMinutes = reminderIntervalMinutes,
         maxReminderCount = maxReminderCount,
+        followStatutoryCalendar = followStatutoryCalendar,
     )
 }

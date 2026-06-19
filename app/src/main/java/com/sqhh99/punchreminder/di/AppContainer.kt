@@ -8,10 +8,14 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.sqhh99.punchreminder.data.holiday.HolidayRefresher
+import com.sqhh99.punchreminder.data.holiday.InMemoryHolidayCalendar
 import com.sqhh99.punchreminder.data.repository.DataStoreTaskRepository
+import com.sqhh99.punchreminder.data.repository.HolidayCacheRepository
 import com.sqhh99.punchreminder.data.repository.TaskRepository
 import com.sqhh99.punchreminder.domain.scheduler.AlarmScheduleRequestBuilder
 import com.sqhh99.punchreminder.domain.scheduler.NextTriggerTimeCalculator
+import com.sqhh99.punchreminder.system.holiday.HolidayApiClient
 import com.sqhh99.punchreminder.domain.usecase.ReminderTriggerHandler
 import com.sqhh99.punchreminder.domain.usecase.TaskScheduler
 import com.sqhh99.punchreminder.system.alarm.AlarmScheduler
@@ -39,7 +43,15 @@ class AppContainer(private val appContext: Context) {
 
     val repository: TaskRepository by lazy { DataStoreTaskRepository(dataStore) }
 
-    val calculator: NextTriggerTimeCalculator by lazy { NextTriggerTimeCalculator() }
+    // 节假日：缓存仓库 + 内存日历（同步查询）+ API 客户端 + 机会性刷新器。
+    val holidayCacheRepository: HolidayCacheRepository by lazy { HolidayCacheRepository(dataStore) }
+    val holidayCalendar: InMemoryHolidayCalendar by lazy { InMemoryHolidayCalendar(holidayCacheRepository) }
+    private val holidayApiClient: HolidayApiClient by lazy { HolidayApiClient() }
+    val holidayRefresher: HolidayRefresher by lazy {
+        HolidayRefresher(holidayApiClient, holidayCacheRepository, holidayCalendar)
+    }
+
+    val calculator: NextTriggerTimeCalculator by lazy { NextTriggerTimeCalculator(holidayCalendar) }
     private val requestBuilder: AlarmScheduleRequestBuilder by lazy { AlarmScheduleRequestBuilder(calculator) }
 
     val appLauncher: AppLauncher by lazy { AppLauncher(appContext) }
@@ -60,6 +72,8 @@ class AppContainer(private val appContext: Context) {
             alarmGateway = alarmScheduler,
             installChecker = appLauncher,
             requestBuilder = requestBuilder,
+            holidayCalendar = holidayCalendar,
+            ensureCalendarLoaded = { holidayCalendar.ensureLoaded() },
         )
     }
 

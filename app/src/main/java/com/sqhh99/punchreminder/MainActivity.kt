@@ -67,6 +67,11 @@ private fun AppRoot(container: AppContainer) {
         }
     }
 
+    // 打开应用时机会性刷新节假日缓存（节流，便宜）；保活进程长期存活时也能拿到更新。
+    LaunchedEffect(Unit) {
+        runCatching { container.holidayRefresher.refreshIfStale() }
+    }
+
     var route by remember { mutableStateOf<Route>(Route.Home) }
 
     when (val current = route) {
@@ -171,6 +176,7 @@ private fun EditFlow(
             onRepeatReminderChange = editVm::setRepeatReminder,
             onReminderIntervalChange = editVm::setReminderInterval,
             onMaxReminderCountChange = editVm::setMaxReminderCount,
+            onFollowStatutoryCalendarChange = editVm::setFollowStatutoryCalendar,
             onSave = editVm::save,
         )
     }

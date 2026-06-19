@@ -63,6 +63,7 @@ fun TaskEditScreen(
     onRepeatReminderChange: (Boolean) -> Unit,
     onReminderIntervalChange: (Int) -> Unit,
     onMaxReminderCountChange: (Int) -> Unit,
+    onFollowStatutoryCalendarChange: (Boolean) -> Unit,
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -161,6 +162,11 @@ fun TaskEditScreen(
             // 开关
             SwitchRow("到点自动尝试打开目标应用", state.autoLaunch, onAutoLaunchChange)
             SwitchRow("锁屏强提醒（到点全屏弹出）", state.lockScreenAlert, onLockScreenAlertChange)
+            SwitchRow(
+                "遵循法定节假日/调休（节假日不提醒，调休日照常提醒）",
+                state.followStatutoryCalendar,
+                onFollowStatutoryCalendarChange,
+            )
             SwitchRow("启用此任务", state.enabled, onEnabledChange)
             SwitchRow("重复提醒（未处理时再次提醒）", state.repeatReminder, onRepeatReminderChange)
             if (state.repeatReminder) {

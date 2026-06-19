@@ -1,6 +1,8 @@
 package com.sqhh99.punchreminder.domain.usecase
 
 import com.sqhh99.punchreminder.data.repository.TaskRepository
+import com.sqhh99.punchreminder.domain.holiday.HolidayCalendar
+import com.sqhh99.punchreminder.domain.holiday.StatutoryDayDecision
 import com.sqhh99.punchreminder.domain.scheduler.AlarmScheduleRequestBuilder
 import com.sqhh99.punchreminder.domain.scheduler.RepeatReminderPlanner
 import java.time.Clock
@@ -30,15 +32,21 @@ class ReminderTriggerHandler(
     private val launchDecision: AppLaunchDecision = AppLaunchDecision(),
     private val requestBuilder: AlarmScheduleRequestBuilder = AlarmScheduleRequestBuilder(),
     private val clock: Clock = Clock.systemDefaultZone(),
+    private val holidayCalendar: HolidayCalendar = HolidayCalendar.ALWAYS_UNKNOWN,
+    private val ensureCalendarLoaded: suspend () -> Unit = {},
 ) {
 
     suspend fun handle(taskId: String, repeatIndex: Int = 0): TriggerOutcome {
         val task = repository.getById(taskId) ?: return TriggerOutcome.SKIPPED_MISSING_TASK
         if (!task.enabled) return TriggerOutcome.SKIPPED_DISABLED
 
+        // 冷启动时确保节假日缓存已从本地装载（suspend，绝不联网）。
+        ensureCalendarLoaded()
         val now = LocalDateTime.now(clock)
-        if (now.dayOfWeek !in task.schedule.activeDays()) {
-            // 不是激活日（理论上不该触发）：仅首次触发时重排到正确的下一次。
+        val base = now.dayOfWeek in task.schedule.activeDays()
+        val dayType = holidayCalendar.dayType(now.toLocalDate())
+        if (!StatutoryDayDecision.shouldRemind(base, task.followStatutoryCalendar, dayType)) {
+            // 非提醒日（非激活星期，或遵循节假日时的法定假日）：仅首次触发时重排到正确的下一次。
             if (repeatIndex == 0) rescheduleNext(task.id)
             return TriggerOutcome.SKIPPED_WRONG_DAY
         }
