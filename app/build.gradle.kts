@@ -25,8 +25,8 @@ android {
         applicationId = "com.sqhh99.punchreminder"
         minSdk = 26
         targetSdk = 35
-        versionCode = 12
-        versionName = "0.8.1"
+        versionCode = 13
+        versionName = "0.8.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
