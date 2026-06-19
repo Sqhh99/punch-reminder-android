@@ -1,5 +1,6 @@
 package com.sqhh99.punchreminder.system.permission
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -44,6 +45,27 @@ class PermissionSettingsLauncher(private val context: Context) {
     private fun batteryOptimizationSettings(): Intent =
         Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
 
+    /**
+     * 跳转到厂商「自启动管理」页。Android 无统一标准 Intent，逐个尝试已知国产 ROM
+     * （OPPO/vivo/小米/华为等）的自启动管理 Activity，直接启动直到成功为止；
+     * 全部失败则回退到应用详情页，由用户手动进入自启动设置。
+     *
+     * 这里用「逐个尝试 startActivity」而非 resolveActivity 预判，因为 Android 11+ 的包可见性
+     * 可能让 resolveActivity 对厂商包返回 null，从而误判为不可用。仅做标准跳转，不做越权授权。
+     */
+    fun openAutostart() {
+        val started = AUTOSTART_COMPONENTS.any { (pkg, cls) ->
+            runCatching {
+                context.startActivity(
+                    Intent()
+                        .setComponent(ComponentName(pkg, cls))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                )
+            }.isSuccess
+        }
+        if (!started) launch(null) // 回退到应用详情页
+    }
+
     private fun appUri(): Uri = Uri.fromParts("package", context.packageName, null)
 
     private fun appDetailsSettings(): Intent =
@@ -57,5 +79,29 @@ class PermissionSettingsLauncher(private val context: Context) {
                     context.startActivity(appDetailsSettings().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 }
             }
+    }
+
+    private companion object {
+        // 各国产 ROM 自启动管理页（package 到 Activity），按机型常见度排序，逐个尝试解析。
+        val AUTOSTART_COMPONENTS = listOf(
+            // OPPO / OnePlus / realme（ColorOS）
+            "com.coloros.safecenter" to "com.coloros.safecenter.permission.startup.StartupAppListActivity",
+            "com.coloros.safecenter" to "com.coloros.safecenter.startupapp.StartupAppListActivity",
+            "com.oppo.safe" to "com.oppo.safe.permission.startup.StartupAppListActivity",
+            "com.coloros.phonemanager" to "com.coloros.phonemanager.startupapp.StartupAppListActivity",
+            // vivo / iQOO（Funtouch / OriginOS）
+            "com.vivo.permissionmanager" to "com.vivo.permissionmanager.activity.BgStartUpManagerActivity",
+            "com.iqoo.secure" to "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager",
+            "com.iqoo.secure" to "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity",
+            // 小米（MIUI / HyperOS）
+            "com.miui.securitycenter" to "com.miui.permcenter.autostart.AutoStartManagementActivity",
+            // 华为 / 荣耀（EMUI / HarmonyOS）
+            "com.huawei.systemmanager" to "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity",
+            "com.huawei.systemmanager" to "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity",
+            // 三星
+            "com.samsung.android.lool" to "com.samsung.android.sm.ui.battery.BatteryActivity",
+            // 魅族
+            "com.meizu.safe" to "com.meizu.safe.security.SHOW_APPSEC",
+        )
     }
 }

@@ -42,6 +42,7 @@ fun PermissionScreen(
     onBack: () -> Unit,
     onRefresh: () -> Unit,
     onOpenSettings: (PermissionType) -> Unit,
+    onOpenAutostart: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // 从系统设置页返回时自动刷新状态。
@@ -93,6 +94,10 @@ fun PermissionScreen(
                 PermissionCard(item = item, onOpenSettings = { onOpenSettings(item.type) })
             }
             item {
+                // 自启动无系统标准 API，既无法在应用内授权也无法检测状态，仅提供跳转引导。
+                AutostartCard(onOpenAutostart = onOpenAutostart)
+            }
+            item {
                 Text(
                     text = "说明：主提醒使用系统闹钟方式调度，应用已常驻一条无声通知用于后台保活。\n" +
                         "国产手机（OPPO/vivo/小米/华为等）请在「自启动管理 / 允许后台活动」中允许本应用，" +
@@ -137,6 +142,30 @@ private fun PermissionCard(item: PermissionItem, onOpenSettings: () -> Unit) {
             if (!item.granted) {
                 OutlinedButton(onClick = onOpenSettings) { Text("去设置") }
             }
+        }
+    }
+}
+
+@Composable
+private fun AutostartCard(onOpenAutostart: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("自启动 / 后台运行", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "国产手机需在系统「自启动管理」中允许本应用，否则退出后会被系统杀掉、收不到提醒。" +
+                        "系统未提供检测开关，请点击右侧手动开启。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            OutlinedButton(onClick = onOpenAutostart) { Text("去开启") }
         }
     }
 }
