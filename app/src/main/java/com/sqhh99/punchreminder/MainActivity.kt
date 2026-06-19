@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqhh99.punchreminder.di.AppContainer
 import com.sqhh99.punchreminder.system.launcher.LaunchResult
+import com.sqhh99.punchreminder.system.service.ReminderForegroundService
 import com.sqhh99.punchreminder.system.permission.NotificationPermission
 import com.sqhh99.punchreminder.ui.apppicker.AppPickerScreen
 import com.sqhh99.punchreminder.ui.permission.PermissionScreen
@@ -36,6 +37,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val container = (application as PunchReminderApp).container
+        // 应用在前台时启动保活前台服务（前台场景启动 FGS 必定被允许）。
+        ReminderForegroundService.start(this)
         setContent {
             PunchReminderTheme {
                 AppRoot(container)
