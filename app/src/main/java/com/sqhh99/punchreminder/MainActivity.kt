@@ -99,6 +99,7 @@ private fun AppRoot(container: AppContainer) {
                 onBack = { route = Route.Home },
                 onRefresh = permVm::refresh,
                 onOpenSettings = { container.permissionSettingsLauncher.open(it) },
+                onOpenAutostart = { container.permissionSettingsLauncher.openAutostart() },
             )
         }
     }
