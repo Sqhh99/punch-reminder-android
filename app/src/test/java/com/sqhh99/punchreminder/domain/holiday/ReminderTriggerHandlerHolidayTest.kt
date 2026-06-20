@@ -42,6 +42,7 @@ class ReminderTriggerHandlerHolidayTest {
         val scheduled = mutableListOf<AlarmScheduleRequest>()
         override fun schedule(request: AlarmScheduleRequest) { scheduled += request }
         override fun cancel(taskId: String) {}
+        override fun cancelRepeats(taskId: String, maxRepeatIndex: Int) {}
         override fun canScheduleExact() = true
     }
 

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
 import com.sqhh99.punchreminder.MainActivity
+import com.sqhh99.punchreminder.PunchReminderApp
 
 /**
  * 通知点击中转页（无 UI，瞬时 finish）。
@@ -23,6 +24,13 @@ class NotificationActionActivity : Activity() {
         val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
         if (notificationId != -1) {
             NotificationManagerCompat.from(this).cancel(notificationId)
+        }
+
+        // 用户已确认此次提醒：取消该任务今日剩余的重复提醒闹钟，避免确认后仍反复弹出。
+        val taskId = intent.getStringExtra(EXTRA_TASK_ID)
+        val maxRepeatIndex = intent.getIntExtra(EXTRA_MAX_REPEAT_INDEX, 0)
+        if (!taskId.isNullOrBlank()) {
+            (application as PunchReminderApp).container.alarmScheduler.cancelRepeats(taskId, maxRepeatIndex)
         }
 
         val action = intent.getStringExtra(EXTRA_ACTION)
@@ -54,6 +62,8 @@ class NotificationActionActivity : Activity() {
         const val EXTRA_NOTIFICATION_ID = "notification_id"
         const val EXTRA_ACTION = "action"
         const val EXTRA_TARGET_PACKAGE = "target_package"
+        const val EXTRA_TASK_ID = "task_id"
+        const val EXTRA_MAX_REPEAT_INDEX = "max_repeat_index"
 
         const val ACTION_OPEN_TARGET = "open_target"
         const val ACTION_OPEN_MAIN = "open_main"
@@ -64,11 +74,15 @@ class NotificationActionActivity : Activity() {
             notificationId: Int,
             action: String,
             targetPackage: String?,
+            taskId: String,
+            maxRepeatIndex: Int,
         ): Intent = Intent(context, NotificationActionActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             putExtra(EXTRA_ACTION, action)
             putExtra(EXTRA_TARGET_PACKAGE, targetPackage)
+            putExtra(EXTRA_TASK_ID, taskId)
+            putExtra(EXTRA_MAX_REPEAT_INDEX, maxRepeatIndex)
         }
     }
 }

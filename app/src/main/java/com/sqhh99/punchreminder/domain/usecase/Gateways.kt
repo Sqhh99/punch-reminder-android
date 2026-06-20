@@ -10,6 +10,9 @@ import com.sqhh99.punchreminder.domain.scheduler.AlarmScheduleRequest
 interface AlarmGateway {
     fun schedule(request: AlarmScheduleRequest)
     fun cancel(taskId: String)
+
+    /** 取消某任务今天剩余的重复提醒闹钟（repeatIndex 1..maxRepeatIndex），不影响次日日常闹钟(index 0)。 */
+    fun cancelRepeats(taskId: String, maxRepeatIndex: Int)
     fun canScheduleExact(): Boolean
 }
 
