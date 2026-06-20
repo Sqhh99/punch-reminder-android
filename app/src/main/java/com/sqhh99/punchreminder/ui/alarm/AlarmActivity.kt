@@ -41,6 +41,7 @@ class AlarmActivity : ComponentActivity() {
         val taskName = intent.getStringExtra(EXTRA_TASK_NAME).orEmpty()
         val appLabel = intent.getStringExtra(EXTRA_APP_LABEL)
         val targetPackage = intent.getStringExtra(EXTRA_TARGET_PACKAGE)
+        val maxRepeatIndex = intent.getIntExtra(EXTRA_MAX_REPEAT_INDEX, 0)
 
         setContent {
             PunchReminderTheme {
@@ -51,9 +52,9 @@ class AlarmActivity : ComponentActivity() {
                         canOpen = !targetPackage.isNullOrBlank(),
                         onOpen = {
                             openTargetApp(targetPackage)
-                            dismiss(taskId)
+                            dismiss(taskId, maxRepeatIndex)
                         },
-                        onDismiss = { dismiss(taskId) },
+                        onDismiss = { dismiss(taskId, maxRepeatIndex) },
                     )
                 }
             }
@@ -81,8 +82,12 @@ class AlarmActivity : ComponentActivity() {
         }
     }
 
-    private fun dismiss(taskId: String?) {
-        taskId?.let { NotificationManagerCompat.from(this).cancel(it.hashCode()) }
+    private fun dismiss(taskId: String?, maxRepeatIndex: Int) {
+        taskId?.let {
+            NotificationManagerCompat.from(this).cancel(it.hashCode())
+            // 用户已确认提醒：取消今日剩余重复提醒闹钟，避免确认后仍反复弹出。
+            (application as PunchReminderApp).container.alarmScheduler.cancelRepeats(it, maxRepeatIndex)
+        }
         finish()
     }
 
@@ -91,6 +96,7 @@ class AlarmActivity : ComponentActivity() {
         const val EXTRA_TASK_NAME = "task_name"
         const val EXTRA_APP_LABEL = "app_label"
         const val EXTRA_TARGET_PACKAGE = "target_package"
+        const val EXTRA_MAX_REPEAT_INDEX = "max_repeat_index"
     }
 }
 

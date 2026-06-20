@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.sqhh99.punchreminder.R
 import com.sqhh99.punchreminder.domain.model.PunchTask
 import com.sqhh99.punchreminder.domain.notification.NotificationContentBuilder
+import com.sqhh99.punchreminder.domain.scheduler.RepeatReminderPlanner
 import com.sqhh99.punchreminder.domain.usecase.NotificationGateway
 import com.sqhh99.punchreminder.system.permission.NotificationPermission
 import com.sqhh99.punchreminder.ui.alarm.AlarmActivity
@@ -94,7 +95,14 @@ class NotificationDispatcher(
         return PendingIntent.getActivity(
             context,
             task.id.hashCode(),
-            NotificationActionActivity.intent(context, task.id.hashCode(), action, task.targetPackage),
+            NotificationActionActivity.intent(
+                context,
+                notificationId = task.id.hashCode(),
+                action = action,
+                targetPackage = task.targetPackage,
+                taskId = task.id,
+                maxRepeatIndex = RepeatReminderPlanner.maxRepeatIndex(task),
+            ),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
     }
@@ -106,6 +114,7 @@ class NotificationDispatcher(
             putExtra(AlarmActivity.EXTRA_TASK_NAME, task.name)
             putExtra(AlarmActivity.EXTRA_APP_LABEL, task.targetAppLabel)
             putExtra(AlarmActivity.EXTRA_TARGET_PACKAGE, task.targetPackage)
+            putExtra(AlarmActivity.EXTRA_MAX_REPEAT_INDEX, RepeatReminderPlanner.maxRepeatIndex(task))
         }
         return PendingIntent.getActivity(
             context,
@@ -122,9 +131,11 @@ class NotificationDispatcher(
             task.id.hashCode() + 1,
             NotificationActionActivity.intent(
                 context,
-                task.id.hashCode(),
-                NotificationActionActivity.ACTION_OPEN_TARGET,
-                task.targetPackage,
+                notificationId = task.id.hashCode(),
+                action = NotificationActionActivity.ACTION_OPEN_TARGET,
+                targetPackage = task.targetPackage,
+                taskId = task.id,
+                maxRepeatIndex = RepeatReminderPlanner.maxRepeatIndex(task),
             ),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )

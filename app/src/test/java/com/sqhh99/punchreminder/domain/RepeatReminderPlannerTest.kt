@@ -44,4 +44,25 @@ class RepeatReminderPlannerTest {
     fun nonPositiveInterval_returnsNull() {
         assertNull(RepeatReminderPlanner.nextRepeatIndex(task(intervalMinutes = 0), currentIndex = 0))
     }
+
+    @Test
+    fun maxRepeatIndex_repeatOff_isZero() {
+        assertEquals(0, RepeatReminderPlanner.maxRepeatIndex(task(repeatReminder = false, maxReminderCount = 5)))
+    }
+
+    @Test
+    fun maxRepeatIndex_nonPositiveInterval_isZero() {
+        assertEquals(0, RepeatReminderPlanner.maxRepeatIndex(task(intervalMinutes = 0, maxReminderCount = 5)))
+    }
+
+    @Test
+    fun maxRepeatIndex_isCountMinusOne() {
+        assertEquals(2, RepeatReminderPlanner.maxRepeatIndex(task(maxReminderCount = 3)))
+        assertEquals(4, RepeatReminderPlanner.maxRepeatIndex(task(maxReminderCount = 5)))
+    }
+
+    @Test
+    fun maxRepeatIndex_countOne_isZero() {
+        assertEquals(0, RepeatReminderPlanner.maxRepeatIndex(task(maxReminderCount = 1)))
+    }
 }

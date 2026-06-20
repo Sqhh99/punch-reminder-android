@@ -59,6 +59,14 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
         existingPendingIntent(taskId)?.let { alarmManager.cancel(it) }
     }
 
+    override fun cancelRepeats(taskId: String, maxRepeatIndex: Int) {
+        // 用户确认提醒后调用：取消今日剩余的重复闹钟（repeatIndex 1..maxRepeatIndex）。
+        // 从 1 开始，保护 repeatIndex=0 的次日日常闹钟不被误删；取消幂等，不存在则跳过。
+        for (repeatIndex in 1..maxRepeatIndex) {
+            existingRepeatPendingIntent(taskId, repeatIndex)?.let { alarmManager.cancel(it) }
+        }
+    }
+
     private fun requestCode(taskId: String, repeatIndex: Int): Int = taskId.hashCode() + repeatIndex
 
     private fun createPendingIntent(taskId: String, repeatIndex: Int): PendingIntent =
@@ -78,10 +86,13 @@ class AlarmScheduler(private val context: Context) : AlarmGateway {
         )
 
     private fun existingPendingIntent(taskId: String): PendingIntent? =
+        existingRepeatPendingIntent(taskId, 0)
+
+    private fun existingRepeatPendingIntent(taskId: String, repeatIndex: Int): PendingIntent? =
         PendingIntent.getBroadcast(
             context,
-            requestCode(taskId, 0),
-            broadcastIntent(taskId, 0),
+            requestCode(taskId, repeatIndex),
+            broadcastIntent(taskId, repeatIndex),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
         )
 

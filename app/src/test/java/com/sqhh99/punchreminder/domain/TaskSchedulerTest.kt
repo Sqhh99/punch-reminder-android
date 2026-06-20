@@ -48,6 +48,7 @@ class TaskSchedulerTest {
         val cancelled = mutableListOf<String>()
         override fun schedule(request: AlarmScheduleRequest) { scheduled += request }
         override fun cancel(taskId: String) { cancelled += taskId }
+        override fun cancelRepeats(taskId: String, maxRepeatIndex: Int) {}
         override fun canScheduleExact() = true
     }
 

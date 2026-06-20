@@ -20,4 +20,15 @@ object RepeatReminderPlanner {
         // maxReminderCount 含首次：累计提醒数 = next + 1，需 <= maxReminderCount。
         return if (next < task.maxReminderCount && task.reminderIntervalMinutes > 0) next else null
     }
+
+    /**
+     * 今天最多会排到的重复提醒序号（首次为 0，故最大重复序号 = maxReminderCount-1）。
+     * 关闭重复提醒或间隔无效时为 0（不会产生任何重复闹钟）。用户确认提醒后据此取消今日剩余重复闹钟。
+     */
+    fun maxRepeatIndex(task: PunchTask): Int =
+        if (!task.repeatReminder || task.reminderIntervalMinutes <= 0) {
+            0
+        } else {
+            (task.maxReminderCount - 1).coerceAtLeast(0)
+        }
 }
