@@ -60,7 +60,7 @@ class NotificationDispatcher(
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_punch_reminder)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.ic_launcher_fg))
+            .setLargeIcon(ContextCompat.getDrawable(context, R.drawable.ic_launcher_fg)?.toBitmap())
             .setContentTitle(content.title)
             .setContentText(content.text)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
