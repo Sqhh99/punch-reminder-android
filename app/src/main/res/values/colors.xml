@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 通知强调色（取角色蓝发色调）：用于通知抽屉/heads-up 的小图标着色与强调色。
+         注意：状态栏小图标由系统强制染白，此色仅作用于下拉通知内，属预期。 -->
+    <color name="notification_accent">#3B5BA5</color>
+</resources>

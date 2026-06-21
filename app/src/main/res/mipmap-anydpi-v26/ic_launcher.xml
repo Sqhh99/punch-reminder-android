@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_fg" />
+    <foreground>
+        <!-- 收进自适应图标安全区：角色居中，避免桌面/ROM 提取状态栏彩色图标时被裁切。 -->
+        <inset android:drawable="@drawable/ic_launcher_fg" android:inset="16%" />
+    </foreground>
 </adaptive-icon>
