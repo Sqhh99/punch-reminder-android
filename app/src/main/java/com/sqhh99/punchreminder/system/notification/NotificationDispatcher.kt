@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.sqhh99.punchreminder.R
@@ -58,7 +59,8 @@ class NotificationDispatcher(
         val content = contentBuilder.build(task)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_stat_punch_reminder)
+            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.ic_launcher_fg))
             .setContentTitle(content.title)
             .setContentText(content.text)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -73,7 +75,7 @@ class NotificationDispatcher(
 
         if (content.showOpenAction) {
             builder.addAction(
-                R.drawable.ic_launcher_foreground,
+                R.drawable.ic_stat_punch_reminder,
                 "打开打卡应用",
                 openTargetAppIntent(task),
             )

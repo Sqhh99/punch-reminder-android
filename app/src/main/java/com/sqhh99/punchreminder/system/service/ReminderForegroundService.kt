@@ -45,7 +45,7 @@ class ReminderForegroundService : Service() {
 
     private fun buildOngoingNotification() =
         NotificationCompat.Builder(this, NotificationDispatcher.SERVICE_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_stat_punch_reminder)
             .setContentTitle("打卡提醒运行中")
             .setContentText("保持提醒按时送达，请勿在最近任务中划掉本应用")
             .setPriority(NotificationCompat.PRIORITY_MIN)
