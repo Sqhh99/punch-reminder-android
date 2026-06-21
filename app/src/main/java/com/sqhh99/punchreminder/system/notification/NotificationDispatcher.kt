@@ -61,6 +61,7 @@ class NotificationDispatcher(
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_punch_reminder)
+            .setColor(ContextCompat.getColor(context, R.color.notification_accent))
             .setLargeIcon(ContextCompat.getDrawable(context, R.drawable.ic_launcher_fg)?.toBitmap())
             .setContentTitle(content.title)
             .setContentText(content.text)
