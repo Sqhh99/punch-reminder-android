@@ -24,3 +24,7 @@ signing.properties
 
 # Windows/WSL "Mark of the Web" 元数据文件（下载文件附带，无用）
 *:Zone.Identifier
+
+# local reference clones (not part of project)
+/FlClash/
+/hiddify-app/
